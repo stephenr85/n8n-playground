@@ -1,0 +1,138 @@
+{
+    "updatedAt": "2026-05-26T14:01:55.523Z",
+    "createdAt": "2026-05-26T14:01:55.523Z",
+    "id": "6ShvvxYoY23M3cdh",
+    "name": "GitHub Repo Stats",
+    "description": null,
+    "active": false,
+    "isArchived": false,
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "trigger-1",
+            "name": "Manual Trigger",
+            "type": "n8n-nodes-base.manualTrigger",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.github.com/repos/n8n-io/n8n",
+                "options": {}
+            },
+            "id": "http-1",
+            "name": "Fetch n8n Repo",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.2,
+            "position": [
+                470,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "1",
+                            "name": "repo",
+                            "value": "={{ $json.full_name }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "2",
+                            "name": "stars",
+                            "value": "={{ $json.stargazers_count }}",
+                            "type": "number"
+                        },
+                        {
+                            "id": "3",
+                            "name": "forks",
+                            "value": "={{ $json.forks_count }}",
+                            "type": "number"
+                        },
+                        {
+                            "id": "4",
+                            "name": "open_issues",
+                            "value": "={{ $json.open_issues_count }}",
+                            "type": "number"
+                        },
+                        {
+                            "id": "5",
+                            "name": "language",
+                            "value": "={{ $json.language }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-1",
+            "name": "Extract Stats",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                690,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Manual Trigger": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch n8n Repo",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch n8n Repo": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Stats",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "staticData": null,
+    "meta": null,
+    "pinData": null,
+    "versionId": "0a529af0-b979-4457-aaf9-ba28c3720d62",
+    "activeVersionId": null,
+    "versionCounter": 1,
+    "triggerCount": 0,
+    "shared": [
+        {
+            "updatedAt": "2026-05-26T14:01:55.523Z",
+            "createdAt": "2026-05-26T14:01:55.523Z",
+            "role": "workflow:owner",
+            "workflowId": "6ShvvxYoY23M3cdh",
+            "projectId": "m6qQjVZiOFxJ13je",
+            "project": {
+                "updatedAt": "2026-05-26T13:58:06.672Z",
+                "createdAt": "2026-05-26T13:56:23.237Z",
+                "id": "m6qQjVZiOFxJ13je",
+                "name": "Stephen Rushing <stephen@n8n-playground.local>",
+                "type": "personal",
+                "icon": null,
+                "description": null,
+                "creatorId": "7ba4eb7b-ecda-4916-ae25-634fdf2a486c"
+            }
+        }
+    ],
+    "tags": [],
+    "activeVersion": null
+}
