@@ -48,13 +48,13 @@
             },
             {
               "name": "Authorization",
-              "value": "Bearer 6|12N1zupZzZZq48tHWxHRl6drwWJOytopI1UpvUkgb35262ae"
+              "value": "Bearer 11|HaoMQoD9cUyTOi7UQlZ8ocORtauDYxl30jz4A28cfc7ede59"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ query: $json.question, mode: \"hybrid\", limit: 5, silos: [\"SBA Lending > Regulations > 13 CFR 120\"] }) }}",
+        "jsonBody": "={{ JSON.stringify({ query: $json.question, mode: \"hybrid\", limit: 5, silos: [\"SBA Lending\"] }) }}",
         "options": {
           "allowUnauthorizedCerts": true,
           "redirect": {
