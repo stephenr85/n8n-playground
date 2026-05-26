@@ -12,6 +12,9 @@ services:
       - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-n8n}
       - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-change-me-in-production}
       - GENERIC_TIMEZONE=${TIMEZONE:-America/New_York}
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+    extra_hosts:
+      - "splicewire.app.splicewire.test:host-gateway"
     volumes:
       - n8n_data:/home/node/.n8n
     depends_on:

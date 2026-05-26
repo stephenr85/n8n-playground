@@ -1,0 +1,174 @@
+{
+  "name": "SBA Loan Advisor (RAG)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        208,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1",
+              "name": "question",
+              "value": "What are the eligibility requirements for an SBA 7(a) loan?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-question",
+      "name": "Set Question",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        432,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://splicewire.app.splicewire.test/api/v1/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 6|12N1zupZzZZq48tHWxHRl6drwWJOytopI1UpvUkgb35262ae"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: $json.question, mode: \"hybrid\", limit: 5, silos: [\"SBA Lending > Regulations > 13 CFR 120\"] }) }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "http-search",
+      "name": "Search Splicewire",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const searchResponse = $input.first().json;\nconst results = searchResponse.data?.results || [];\n\n// Get the question from earlier in the chain\nconst question = \"What are the eligibility requirements for an SBA 7(a) loan?\";\n\nconst context = results.map((r, i) => {\n  const name = r.fragment?.name || \"Unknown\";\n  const text = (r.fragment?.text || \"\").substring(0, 2000);\n  const score = r.rrf_score || 0;\n  return `--- Source ${i+1}: ${name} (score: ${score.toFixed(4)}) ---\\n${text}`;\n}).join(\"\\n\\n\");\n\nreturn [{ json: { question, context, source_count: results.length } }];"
+      },
+      "id": "code-format",
+      "name": "Format Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: \"gpt-4o-mini\", temperature: 0.2, messages: [{ role: \"system\", content: \"You are an SBA lending regulatory specialist. Answer questions about SBA loan programs using ONLY the provided regulatory context from 13 CFR Part 120. Cite specific CFR section numbers when referencing regulations. If the context does not contain enough information to fully answer, say so clearly.\" }, { role: \"user\", content: \"Based on the following regulatory context, answer this question:\\n\\nQuestion: \" + $json.question + \"\\n\\nRegulatory Context:\\n\" + $json.context }] }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1088,
+        304
+      ],
+      "name": "Ask OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "z9PE2L81vU33JQC0",
+          "name": "OpenAI account"
+        }
+      },
+      "id": "33020a96-084d-48e3-8ada-03c0c1b23971"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Question",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Question": {
+      "main": [
+        [
+          {
+            "node": "Search Splicewire",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Splicewire": {
+      "main": [
+        [
+          {
+            "node": "Format Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Context": {
+      "main": [
+        [
+          {
+            "node": "Ask OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "staticData": null
+}
